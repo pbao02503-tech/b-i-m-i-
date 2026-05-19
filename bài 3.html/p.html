@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Lab 18 - Quản Lý Danh Sách Thành Viên</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .search-section {
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            padding-left: 40px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #6c757d;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .member-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 200px;
+        }
+        
+        .list-header {
+            display: grid;
+            grid-template-columns: 50px 1fr 200px 150px;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .member-item {
+            display: grid;
+            grid-template-columns: 50px 1fr 200px 150px;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .member-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .member-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .member-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .member-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .member-email {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .member-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-edit:hover {
+            background: #e0a800;
+            transform: scale(1.05);
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .edit-mode {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .list-header,
+            .member-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .member-actions {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>👥 Quản Lý Thành Viên</h1>
+        <p class="subtitle">Thêm, sửa, xóa và tìm kiếm thành viên dễ dàng</p>
+
+        <!-- Form nhập liệu -->
+        <div class="input-section">
+            <div class="form-group">
+                <label for="member-name">Tên thành viên *</label>
+                <input type="text" id="member-name" placeholder="Nhập tên thành viên...">
+            </div>
+            <div class="form-group">
+                <label for="member-email">Email</label>
+                <input type="email" id="member-email" placeholder="Nhập email...">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" id="btn-add">
+                    ➕ Thêm thành viên
+                </button>
+                <button class="btn btn-secondary" id="btn-cancel" style="display: none;">
+                    ❌ Hủy
+                </button>
+            </div>
+        </div>
+
+        <!-- Tìm kiếm -->
+        <div class="search-section">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Tìm kiếm theo tên hoặc email...">
+            </div>
+        </div>
+
+        <!-- Thống kê -->
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-members">0</div>
+                <div class="stat-label">Tổng thành viên</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="visible-members">0</div>
+                <div class="stat-label">Đang hiển thị</div>
+            </div>
+        </div>
+
+        <!-- Danh sách thành viên -->
+        <div class="member-list">
+            <div class="list-header">
+                <div>STT</div>
+                <div>Thông tin</div>
+                <div>Ngày tạo</div>
+                <div>Thao tác</div>
+            </div>
+            <div id="member-list-content">
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>Chưa có thành viên nào</h3>
+                    <p>Hãy thêm thành viên đầu tiên của bạn!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            let members = [];
+            let editingId = null;
+
+            // Hàm tạo ID ngẫu nhiên
+            function generateId() {
+                return Date.now() + Math.random();
+            }
+
+            // Hàm định dạng ngày giờ
+            function formatDate(date) {
+                const d = new Date(date);
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const hours = String(d.getHours()).padStart(2, '0');
+                const minutes = String(d.getMinutes()).padStart(2, '0');
+                return `${day}/${month}/${year} ${hours}:${minutes}`;
+            }
+
+            // Hàm render danh sách thành viên
+            function renderMembers(searchTerm = '') {
+                const listContent = $('#member-list-content');
+
+                // Lọc theo từ khóa tìm kiếm
+                let filteredMembers = members;
+                if (searchTerm) {
+                    searchTerm = searchTerm.toLowerCase();
+                    filteredMembers = members.filter(m =>
+                        m.name.toLowerCase().includes(searchTerm) ||
+                        m.email.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                // Hiển thị trạng thái rỗng hoặc không tìm thấy
+                if (members.length === 0) {
+                    listContent.html(`
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <h3>Chưa có thành viên nào</h3>
+                            <p>Hãy thêm thành viên đầu tiên của bạn!</p>
+                        </div>
+                    `);
+                    updateStats(0, 0);
+                    return;
+                }
+
+                if (filteredMembers.length === 0) {
+                    listContent.html(`
+                        <div class="no-results">
+                            <h3>🔍 Không tìm thấy kết quả</h3>
+                            <p>Không có thành viên nào khớp với từ khóa "${searchTerm}"</p>
+                        </div>
+                    `);
+                    updateStats(members.length, 0);
+                    return;
+                }
+
+                // Render danh sách
+                let html = '';
+                filteredMembers.forEach((member, index) => {
+                    const editClass = editingId === member.id ? 'edit-mode' : '';
+                    html += `
+                        <div class="member-item ${editClass}" data-id="${member.id}">
+                            <div class="member-number">#${index + 1}</div>
+                            <div class="member-info">
+                                <div class="member-name">${member.name}</div>
+                                <div class="member-email">${member.email || 'Chưa có email'}</div>
+                            </div>
+                            <div class="member-date">${formatDate(member.createdAt)}</div>
+                            <div class="member-actions">
+                                <button class="btn-sm btn-edit" data-id="${member.id}">
+                                    ✏️ Sửa
+                                </button>
+                                <button class="btn-sm btn-delete" data-id="${member.id}">
+                                    🗑️ Xóa
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                listContent.html(html);
+                updateStats(members.length, filteredMembers.length);
+            }
+
+            // Hàm cập nhật thống kê
+            function updateStats(total, visible) {
+                $('#total-members').text(total);
+                $('#visible-members').text(visible);
+            }
+
+            // Hàm xóa form
+            function clearForm() {
+                $('#member-name').val('');
+                $('#member-email').val('');
+                editingId = null;
+                $('#btn-add').text('➕ Thêm thành viên');
+                $('#btn-cancel').hide();
+                $('.member-item').removeClass('edit-mode');
+            }
+
+            // Hàm validate form
+            function validateForm() {
+                const name = $('#member-name').val().trim();
+
+                if (!name) {
+                    alert('⚠️ Vui lòng nhập tên thành viên!');
+                    $('#member-name').focus();
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Sự kiện THÊM thành viên
+            $('#btn-add').click(function() {
+                if (!validateForm()) return;
+
+                const name = $('#member-name').val().trim();
+                const email = $('#member-email').val().trim();
+
+                if (editingId) {
+                    // Chế độ SỬA
+                    const member = members.find(m => m.id === editingId);
+                    if (member) {
+                        member.name = name;
+                        member.email = email;
+                    }
+                    clearForm();
+                } else {
+                    // Chế độ THÊM
+                    const newMember = {
+                        id: generateId(),
+                        name: name,
+                        email: email,
+                        createdAt: new Date()
+                    };
+                    members.unshift(newMember);
+                    clearForm();
+                }
+
+                renderMembers($('#search-input').val());
+            });
+
+            // Sự kiện HỦY sửa
+            $('#btn-cancel').click(function() {
+                clearForm();
+            });
+
+            // Sự kiện SỬA thành viên (Event Delegation)
+            $(document).on('click', '.btn-edit', function() {
+                const id = $(this).data('id');
+                const member = members.find(m => m.id === id);
+
+                if (member) {
+                    editingId = id;
+                    $('#member-name').val(member.name);
+                    $('#member-email').val(member.email);
+                    $('#btn-add').text('💾 Cập nhật thành viên');
+                    $('#btn-cancel').show();
+
+                    renderMembers($('#search-input').val());
+
+                    // Scroll lên form
+                    $('html, body').animate({
+                        scrollTop: $('.input-section').offset().top - 20
+                    }, 500);
+
+                    $('#member-name').focus();
+                }
+            });
+
+            // Sự kiện XÓA thành viên (Event Delegation)
+            $(document).on('click', '.btn-delete', function() {
+                const id = $(this).data('id');
+                const member = members.find(m => m.id === id);
+
+                if (member && confirm(`Bạn có chắc muốn xóa "${member.name}"?`)) {
+                    members = members.filter(m => m.id !== id);
+
+                    if (editingId === id) {
+                        clearForm();
+                    }
+
+                    renderMembers($('#search-input').val());
+                }
+            });
+
+            // Sự kiện TÌM KIẾM
+            $('#search-input').on('input', function() {
+                const searchTerm = $(this).val();
+                renderMembers(searchTerm);
+            });
+
+            // Sự kiện ENTER trong ô nhập
+            $('#member-name, #member-email').keypress(function(e) {
+                if (e.which === 13) {
+                    $('#btn-add').click();
+                }
+            });
+
+            // Khởi tạo dữ liệu mẫu (tùy chọn)
+            members = [{
+                id: generateId(),
+                name: 'Nguyễn Văn A',
+                email: 'nguyenvana@email.com',
+                createdAt: new Date('2026-05-18T10:30:00')
+            }, {
+                id: generateId(),
+                name: 'Trần Thị B',
+                email: 'tranthib@email.com',
+                createdAt: new Date('2026-05-18T14:20:00')
+            }, {
+                id: generateId(),
+                name: 'Lê Văn C',
+                email: 'levanc@email.com',
+                createdAt: new Date('2026-05-19T09:15:00')
+            }];
+
+            // Render lần đầu
+            renderMembers();
+        });
+    </script>
+</body>
+
+</html>
