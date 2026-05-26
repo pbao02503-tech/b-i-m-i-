@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Lab 17 - Giỏ Hàng Đơn Giản</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        
+        .cart-items {
+            margin-bottom: 30px;
+        }
+        
+        .product-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .product-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .product-image {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            color: #667eea;
+            font-weight: 500;
+        }
+        
+        .product-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border-radius: 10px;
+            padding: 5px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .btn-quantity {
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-quantity:hover {
+            background: #5568d3;
+            transform: scale(1.1);
+        }
+        
+        .btn-quantity:active {
+            transform: scale(0.95);
+        }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            border: none;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            background: transparent;
+        }
+        
+        .product-total {
+            min-width: 150px;
+            text-align: right;
+        }
+        
+        .total-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .total-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .btn-remove {
+            padding: 8px 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-remove:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        .cart-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .summary-row.total {
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .btn-checkout {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-cart-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .product-item {
+            animation: slideIn 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🛒 Giỏ Hàng Của Tôi</h1>
+
+        <div class="cart-items" id="cart-items">
+            <!-- Sản phẩm 1 -->
+            <div class="product-item" data-product-id="1">
+                <div class="product-image">💻</div>
+                <div class="product-info">
+                    <div class="product-name">Laptop Dell XPS 13</div>
+                    <div class="product-price">Đơn giá: <span class="unit-price" data-price="25000000">25,000,000</span>đ</div>
+                </div>
+                <div class="product-controls">
+                    <div class="quantity-control">
+                        <button class="btn-quantity btn-decrease">−</button>
+                        <input type="text" class="quantity-input" value="1" readonly>
+                        <button class="btn-quantity btn-increase">+</button>
+                    </div>
+                    <div class="product-total">
+                        <div class="total-label">Thành tiền</div>
+                        <div class="total-price">25,000,000đ</div>
+                    </div>
+                    <button class="btn-remove">🗑️ Xóa</button>
+                </div>
+            </div>
+
+            <!-- Sản phẩm 2 -->
+            <div class="product-item" data-product-id="2">
+                <div class="product-image">📱</div>
+                <div class="product-info">
+                    <div class="product-name">iPhone 15 Pro Max</div>
+                    <div class="product-price">Đơn giá: <span class="unit-price" data-price="30000000">30,000,000</span>đ</div>
+                </div>
+                <div class="product-controls">
+                    <div class="quantity-control">
+                        <button class="btn-quantity btn-decrease">−</button>
+                        <input type="text" class="quantity-input" value="1" readonly>
+                        <button class="btn-quantity btn-increase">+</button>
+                    </div>
+                    <div class="product-total">
+                        <div class="total-label">Thành tiền</div>
+                        <div class="total-price">30,000,000đ</div>
+                    </div>
+                    <button class="btn-remove">🗑️ Xóa</button>
+                </div>
+            </div>
+
+            <!-- Sản phẩm 3 -->
+            <div class="product-item" data-product-id="3">
+                <div class="product-image">🎧</div>
+                <div class="product-info">
+                    <div class="product-name">AirPods Pro</div>
+                    <div class="product-price">Đơn giá: <span class="unit-price" data-price="5500000">5,500,000</span>đ</div>
+                </div>
+                <div class="product-controls">
+                    <div class="quantity-control">
+                        <button class="btn-quantity btn-decrease">−</button>
+                        <input type="text" class="quantity-input" value="1" readonly>
+                        <button class="btn-quantity btn-increase">+</button>
+                    </div>
+                    <div class="product-total">
+                        <div class="total-label">Thành tiền</div>
+                        <div class="total-price">5,500,000đ</div>
+                    </div>
+                    <button class="btn-remove">🗑️ Xóa</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="cart-summary">
+            <div class="summary-row">
+                <span>Số lượng sản phẩm:</span>
+                <span id="total-items">3</span>
+            </div>
+            <div class="summary-row">
+                <span>Tổng số lượng:</span>
+                <span id="total-quantity">3</span>
+            </div>
+            <div class="summary-row total">
+                <span>TỔNG THANH TOÁN:</span>
+                <span id="grand-total">60,500,000đ</span>
+            </div>
+            <button class="btn-checkout" id="btn-checkout">Thanh Toán</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+
+            // Hàm định dạng số tiền
+            function formatMoney(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            // Hàm tính thành tiền cho 1 sản phẩm
+            function updateProductTotal(productItem) {
+                const quantity = parseInt($(productItem).find('.quantity-input').val());
+                const unitPrice = parseInt($(productItem).find('.unit-price').data('price'));
+                const total = quantity * unitPrice;
+
+                $(productItem).find('.total-price').text(formatMoney(total) + 'đ');
+            }
+
+            // Hàm tính tổng hóa đơn toàn bộ giỏ hàng
+            function updateCartSummary() {
+                let totalItems = 0;
+                let totalQuantity = 0;
+                let grandTotal = 0;
+
+                $('.product-item').each(function() {
+                    const quantity = parseInt($(this).find('.quantity-input').val());
+                    const unitPrice = parseInt($(this).find('.unit-price').data('price'));
+
+                    totalItems++;
+                    totalQuantity += quantity;
+                    grandTotal += quantity * unitPrice;
+                });
+
+                $('#total-items').text(totalItems);
+                $('#total-quantity').text(totalQuantity);
+                $('#grand-total').text(formatMoney(grandTotal) + 'đ');
+
+                // Hiển thị thông báo giỏ rỗng nếu không có sản phẩm
+                if (totalItems === 0) {
+                    $('#cart-items').html(`
+                        <div class="empty-cart">
+                            <div class="empty-cart-icon">🛒</div>
+                            <h2>Giỏ hàng trống</h2>
+                            <p>Hãy thêm sản phẩm vào giỏ hàng của bạn!</p>
+                        </div>
+                    `);
+                }
+            }
+
+            // Sự kiện nút TĂNG số lượng
+            $(document).on('click', '.btn-increase', function() {
+                const productItem = $(this).closest('.product-item');
+                const quantityInput = productItem.find('.quantity-input');
+                let quantity = parseInt(quantityInput.val());
+
+                quantity++;
+                quantityInput.val(quantity);
+
+                updateProductTotal(productItem);
+                updateCartSummary();
+            });
+
+            // Sự kiện nút GIẢM số lượng
+            $(document).on('click', '.btn-decrease', function() {
+                const productItem = $(this).closest('.product-item');
+                const quantityInput = productItem.find('.quantity-input');
+                let quantity = parseInt(quantityInput.val());
+
+                // Không cho giảm xuống dưới 1
+                if (quantity > 1) {
+                    quantity--;
+                    quantityInput.val(quantity);
+
+                    updateProductTotal(productItem);
+                    updateCartSummary();
+                }
+            });
+
+            // Sự kiện nút XÓA sản phẩm
+            $(document).on('click', '.btn-remove', function() {
+                const productItem = $(this).closest('.product-item');
+                const productName = productItem.find('.product-name').text();
+
+                if (confirm('Bạn có chắc muốn xóa "' + productName + '" khỏi giỏ hàng?')) {
+                    productItem.fadeOut(300, function() {
+                        $(this).remove();
+                        updateCartSummary();
+                    });
+                }
+            });
+
+            // Sự kiện nút THANH TOÁN
+            $('#btn-checkout').click(function() {
+                const totalItems = parseInt($('#total-items').text());
+
+                if (totalItems === 0) {
+                    alert('Giỏ hàng trống! Vui lòng thêm sản phẩm.');
+                    return;
+                }
+
+                const grandTotal = $('#grand-total').text();
+                const totalQuantity = $('#total-quantity').text();
+
+                alert('🎉 Đặt hàng thành công!\n\n' +
+                    'Số sản phẩm: ' + totalItems + '\n' +
+                    'Tổng số lượng: ' + totalQuantity + '\n' +
+                    'Tổng tiền: ' + grandTotal + '\n\n' +
+                    'Cảm ơn bạn đã mua hàng!');
+            });
+
+            // Khởi tạo tổng ban đầu
+            updateCartSummary();
+        });
+    </script>
+</body>
+
+</html>

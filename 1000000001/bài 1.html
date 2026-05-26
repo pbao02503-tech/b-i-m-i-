@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Lab 16 - Bộ Đếm Lượt Tương Tác</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .counter-display {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 3px solid #e9ecef;
+        }
+        
+        #counter {
+            font-size: 72px;
+            font-weight: bold;
+            color: #28a745;
+            transition: color 0.3s ease;
+        }
+        
+        #counter.negative {
+            color: #dc3545;
+        }
+        
+        #counter.zero {
+            color: #6c757d;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #btn-increase {
+            background: #28a745;
+            color: white;
+        }
+        
+        #btn-increase:hover {
+            background: #218838;
+        }
+        
+        #btn-decrease {
+            background: #dc3545;
+            color: white;
+        }
+        
+        #btn-decrease:hover {
+            background: #c82333;
+        }
+        
+        #btn-reset {
+            background: #6c757d;
+            color: white;
+        }
+        
+        #btn-reset:hover {
+            background: #5a6268;
+        }
+        
+        #btn-increase-10 {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        #btn-increase-10:hover {
+            background: #138496;
+        }
+        
+        .info-text {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .animation {
+            animation: pulse 0.3s ease;
+        }
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔢 Bộ Đếm Lượt Tương Tác</h1>
+
+        <div class="counter-display">
+            <div id="counter" class="zero">0</div>
+        </div>
+
+        <div class="button-group">
+            <button id="btn-increase">➕ Tăng (+1)</button>
+            <button id="btn-decrease">➖ Giảm (-1)</button>
+            <button id="btn-increase-10">⚡ Tăng nhanh (+10)</button>
+            <button id="btn-reset">🔄 Đặt lại</button>
+        </div>
+
+        <div class="info-text">
+            <p>✅ Màu xanh: Giá trị dương</p>
+            <p>🔴 Màu đỏ: Giá trị âm</p>
+            <p>⚪ Màu xám: Giá trị bằng 0</p>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Khai báo biến trạng thái
+            let counter = 0;
+
+            // Hàm cập nhật giao diện
+            function updateDisplay() {
+                // Cập nhật số đếm
+                $('#counter').text(counter);
+
+                // Thêm hiệu ứng animation
+                $('#counter').addClass('animation');
+                setTimeout(function() {
+                    $('#counter').removeClass('animation');
+                }, 300);
+
+                // Đổi màu theo giá trị
+                $('#counter').removeClass('negative zero');
+
+                if (counter > 0) {
+                    // Màu xanh cho số dương
+                    $('#counter').css('color', '#28a745');
+                } else if (counter < 0) {
+                    // Màu đỏ cho số âm
+                    $('#counter').addClass('negative');
+                } else {
+                    // Màu xám cho số 0
+                    $('#counter').addClass('zero');
+                }
+            }
+
+            // Gắn sự kiện cho nút Tăng (+1)
+            $('#btn-increase').click(function() {
+                counter++;
+                updateDisplay();
+            });
+
+            // Gắn sự kiện cho nút Giảm (-1)
+            $('#btn-decrease').click(function() {
+                counter--;
+                // Nếu muốn không cho giảm xuống âm, bỏ comment dòng dưới:
+                // if (counter < 0) counter = 0;
+                updateDisplay();
+            });
+
+            // Gắn sự kiện cho nút Đặt lại
+            $('#btn-reset').click(function() {
+                counter = 0;
+                updateDisplay();
+            });
+
+            // Gắn sự kiện cho nút Tăng nhanh (+10) - YÊU CẦU MỞ RỘNG
+            $('#btn-increase-10').click(function() {
+                counter += 10;
+                updateDisplay();
+            });
+        });
+    </script>
+</body>
+
+</html>
