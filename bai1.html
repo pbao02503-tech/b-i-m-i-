@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>So sánh tìm kiếm xâu mẫu: Trực tiếp vs Boyer-Moore</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #020617;
+            color: #e5e7eb;
+            line-height: 1.6;
+            padding: 24px 12px;
+        }
+        
+        .container {
+            max-width: 1080px;
+            margin: 0 auto;
+            background: #020617;
+            border-radius: 16px;
+            padding: 24px 26px 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            border: 1px solid #1f2937;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 6px;
+            color: #f97316;
+        }
+        
+        p.desc {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 14px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #1f2937;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #a5b4fc;
+            margin-bottom: 10px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        @media (max-width: 840px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+        
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #1f2937;
+            background: #020617;
+            color: #e5e7eb;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .btn-row {
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        
+        button {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: #22c55e;
+            color: #0f172a;
+            margin-right: 8px;
+        }
+        
+        button.secondary {
+            background: #38bdf8;
+            color: #020617;
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        @media (max-width: 840px) {
+            .columns {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: #020617;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            padding: 10px 12px 12px;
+        }
+        
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 4px;
+        }
+        
+        .card-sub {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+        
+        .result-line {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        pre {
+            background: #020617;
+            border-radius: 10px;
+            padding: 8px 10px;
+            overflow-x: auto;
+            margin-top: 6px;
+            border: 1px solid #1f2937;
+            font-size: 12px;
+        }
+        
+        code {
+            font-family: Consolas, Menlo, "Fira Code", monospace;
+        }
+        
+        .stats {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #a5b4fc;
+        }
+        
+        .highlight {
+            background: #1f2937;
+            border-radius: 6px;
+            padding: 4px 6px;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="badge">
+            So sánh thuật toán tìm kiếm xâu mẫu: Naive vs Boyer-Moore
+        </div>
+
+        <h1>Tìm kiếm xâu mẫu: Thuật toán trực tiếp và Boyer-Moore</h1>
+        <p class="desc">
+            Trang này minh họa cách hoạt động và so sánh kết quả của hai thuật toán:
+            <strong>tìm kiếm trực tiếp (naive)</strong> và <strong>Boyer-Moore (quy tắc Ký tự xấu)</strong>. Bạn có thể nhập text, pattern và xem vị trí khớp, số phép so sánh ký tự mà mỗi thuật toán thực hiện.
+        </p>
+
+        <div class="form-grid">
+            <div>
+                <label for="textInput">Text (chuỗi văn bản):</label>
+                <textarea id="textInput">ABAAABCDABCDAABCD</textarea>
+            </div>
+            <div>
+                <label for="patternInput">Pattern (xâu mẫu):</label>
+                <input type="text" id="patternInput" value="ABCD">
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button id="runBtn">Chạy cả hai thuật toán</button>
+            <button id="resetBtn" class="secondary">Xóa kết quả</button>
+        </div>
+
+        <div class="columns">
+            <div class="card">
+                <div class="card-title">Thuật toán tìm kiếm trực tiếp (Naive)</div>
+                <div class="card-sub">
+                    Duyệt từng vị trí có thể trong text, so sánh pattern từ trái sang phải.[web:198][web:203]
+                </div>
+                <div id="naiveResult" class="result-line">Chưa chạy.</div>
+                <div class="stats" id="naiveStats"></div>
+                <pre><code id="naiveLog">Log thuật toán sẽ hiển thị ở đây.</code></pre>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Thuật toán Boyer-Moore (Bad Character)</div>
+                <div class="card-sub">
+                    So sánh pattern từ phải sang trái, dùng quy tắc ký tự xấu để "nhảy" qua các vị trí không cần thiết.[web:201][web:195]
+                </div>
+                <div id="bmResult" class="result-line">Chưa chạy.</div>
+                <div class="stats" id="bmStats"></div>
+                <pre><code id="bmLog">Log thuật toán sẽ hiển thị ở đây.</code></pre>
+            </div>
+        </div>
+
+        <div class="highlight">
+            Gợi ý: Thử với text dài hơn và pattern dài để thấy sự khác biệt số phép so sánh giữa hai thuật toán.
+        </div>
+    </div>
+
+    <script>
+        // Thuật toán tìm kiếm trực tiếp (naive)
+        function naiveSearch(text, pattern) {
+            const n = text.length;
+            const m = pattern.length;
+            const positions = [];
+            const log = [];
+            let comparisons = 0;
+
+            if (m === 0 || n === 0 || m > n) {
+                log.push("Pattern rỗng hoặc dài hơn text => không có kết quả.");
+                return {
+                    positions,
+                    comparisons,
+                    log
+                };
+            }
+
+            log.push(`Text: "${text}"`);
+            log.push(`Pattern: "${pattern}"`);
+            log.push(`Độ dài text = ${n}, độ dài pattern = ${m}`);
+            log.push("Duyệt từng vị trí có thể và so sánh từ trái sang phải...\n");
+
+            for (let i = 0; i <= n - m; i++) {
+                log.push(`---`);
+                log.push(`Thử khớp pattern tại vị trí i = ${i}`);
+                let j;
+                for (j = 0; j < m; j++) {
+                    comparisons++;
+                    log.push(
+                        `So sánh: text[${i + j}] = '${text[i + j]}' với pattern[${j}] = '${pattern[j]}'`
+                    );
+                    if (text[i + j] !== pattern[j]) {
+                        log.push(`=> Mismatch, dừng tại j = ${j}`);
+                        break;
+                    }
+                }
+                if (j === m) {
+                    log.push(`=> Tìm thấy pattern tại vị trí i = ${i}`);
+                    positions.push(i);
+                }
+                log.push("");
+            }
+
+            return {
+                positions,
+                comparisons,
+                log
+            };
+        }
+
+        // Boyer-Moore với Bad Character
+        const NO_OF_CHARS = 256;
+
+        function badCharHeuristic(pattern) {
+            const badChar = new Array(NO_OF_CHARS).fill(-1);
+            for (let i = 0; i < pattern.length; i++) {
+                badChar[pattern.charCodeAt(i)] = i;
+            }
+            return badChar;
+        }
+
+        function boyerMooreBadChar(text, pattern) {
+            const n = text.length;
+            const m = pattern.length;
+            const positions = [];
+            const log = [];
+            let comparisons = 0;
+
+            if (m === 0 || n === 0 || m > n) {
+                log.push("Pattern rỗng hoặc dài hơn text => không có kết quả.");
+                return {
+                    positions,
+                    comparisons,
+                    log
+                };
+            }
+
+            const badChar = badCharHeuristic(pattern);
+
+            log.push(`Text: "${text}"`);
+            log.push(`Pattern: "${pattern}"`);
+            log.push(`Độ dài text = ${n}, độ dài pattern = ${m}`);
+            log.push("So sánh từ phải sang trái, dùng Bad Character để dịch...\n");
+
+            let s = 0; // shift
+            while (s <= n - m) {
+                let j = m - 1;
+                log.push(`---`);
+                log.push(`Đang căn pattern tại s = ${s}`);
+
+                // so sánh từ phải sang trái
+                while (j >= 0 && pattern[j] === text[s + j]) {
+                    comparisons++;
+                    log.push(
+                        `Khớp: pattern[${j}] = '${pattern[j]}' với text[${s + j}] = '${text[s + j]}'`
+                    );
+                    j--;
+                }
+
+                if (j < 0) {
+                    log.push(`=> Tìm thấy pattern tại vị trí s = ${s}`);
+                    positions.push(s);
+
+                    if (s + m < n) {
+                        const nextCharCode = text.charCodeAt(s + m);
+                        const shift = m - badChar[nextCharCode];
+                        log.push(`Dịch pattern sang phải: shift = ${shift}`);
+                        s += shift;
+                    } else {
+                        s += 1;
+                    }
+                } else {
+                    comparisons++;
+                    log.push(
+                        `Mismatch tại j = ${j}: pattern[${j}] = '${pattern[j]}' khác text[${s + j}] = '${text[s + j]}'`
+                    );
+                    const badIndex = badChar[text.charCodeAt(s + j)];
+                    const shift = Math.max(1, j - badIndex);
+                    log.push(
+                        `Vị trí xuất hiện cuối cùng của '${text[s + j]}' trong pattern = ${badIndex}`
+                    );
+                    log.push(`Dịch pattern sang phải: shift = max(1, ${j} - ${badIndex}) = ${shift}`);
+                    s += shift;
+                }
+                log.push("");
+            }
+
+            return {
+                positions,
+                comparisons,
+                log
+            };
+        }
+
+        // Gắn vào UI
+        const runBtn = document.getElementById('runBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const textInput = document.getElementById('textInput');
+        const patternInput = document.getElementById('patternInput');
+
+        const naiveResult = document.getElementById('naiveResult');
+        const naiveStats = document.getElementById('naiveStats');
+        const naiveLog = document.getElementById('naiveLog');
+
+        const bmResult = document.getElementById('bmResult');
+        const bmStats = document.getElementById('bmStats');
+        const bmLog = document.getElementById('bmLog');
+
+        runBtn.addEventListener('click', () => {
+            const text = textInput.value;
+            const pattern = patternInput.value;
+
+            const naive = naiveSearch(text, pattern);
+            const bm = boyerMooreBadChar(text, pattern);
+
+            if (naive.positions.length > 0) {
+                naiveResult.textContent =
+                    "Vị trí khớp (tính từ 0): " + naive.positions.join(", ");
+            } else {
+                naiveResult.textContent = "Không tìm thấy pattern trong text.";
+            }
+            naiveStats.textContent = "Số phép so sánh ký tự (naive): " + naive.comparisons;
+            naiveLog.textContent = naive.log.join("\n");
+
+            if (bm.positions.length > 0) {
+                bmResult.textContent =
+                    "Vị trí khớp (tính từ 0): " + bm.positions.join(", ");
+            } else {
+                bmResult.textContent = "Không tìm thấy pattern trong text.";
+            }
+            bmStats.textContent = "Số phép so sánh ký tự (Boyer-Moore): " + bm.comparisons;
+            bmLog.textContent = bm.log.join("\n");
+        });
+
+        resetBtn.addEventListener('click', () => {
+            naiveResult.textContent = "Chưa chạy.";
+            naiveStats.textContent = "";
+            naiveLog.textContent = "Log thuật toán sẽ hiển thị ở đây.";
+
+            bmResult.textContent = "Chưa chạy.";
+            bmStats.textContent = "";
+            bmLog.textContent = "Log thuật toán sẽ hiển thị ở đây.";
+        });
+    </script>
+</body>
+
+</html>
